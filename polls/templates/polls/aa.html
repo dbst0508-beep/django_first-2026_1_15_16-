@@ -1,0 +1,21 @@
+<h1>안녕하세요 aa 입니다</h1>
+
+<h1>Question 전체</h1>
+<p>latest_question_list 전체 출력</p>
+<p>2번 문제 : {{questions}}</p>
+
+<h2> 질문 목록 하나씩 꺼내기</h2>
+{% for q in questions %}
+    <div>
+        <p><strong>원형 데이터:</strong> {{ q }}</p>
+
+        <p><strong>데이터 아이디:</strong> {{ q.id }}</p>
+
+        <p><strong>모델 데이터 제목:</strong> {{ q.question_text }}</p>
+   
+        <p><strong>시간 및 날짜:</strong> {{ q.pub_date }}</p>
+    </div>
+
+
+    <hr>
+{% endfor %}
