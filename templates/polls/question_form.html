@@ -1,0 +1,34 @@
+{% extends "polls/base.html" %}
+{% block title %} 질문 작성/수정 {% endblock %}
+
+{% block content %}
+<form method="post"> 
+ <div class="form-container"> 
+  {% csrf_token %} 
+
+  <p>
+   <label for="{{ form.question_text.id_for_label }}">질문:</label><br>
+   <input type="text" 
+      name="{{ form.question_text.name }}" 
+      id="{{ form.question_text.id_for_label }}" 
+      value="{{ form.question_text.value|default_if_none:'' }}" 
+      placeholder="예: 당신이 좋아하는 음식은 무엇인가요?"
+      required>
+   {{ form.question_text.errors }}
+  </p>
+
+  <p>
+   <label for="{{ form.pub_date.id_for_label }}">게시 날짜와 시간:</label><br>
+   <input type="datetime-local"
+      name="{{ form.pub_date.name }}"
+      id="{{ form.pub_date.id_for_label }}"
+      value="{{ form.pub_date.value|default_if_none:'' }}"
+      placeholder="예: 2025-06-06T10:00"
+      required>
+   {{ form.pub_date.errors }}
+  </p>
+
+  <button type="submit" class="submit-btn">저장</button>
+ </div>
+</form>
+{% endblock %}

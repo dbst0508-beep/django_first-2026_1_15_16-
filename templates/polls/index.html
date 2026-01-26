@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block content %}
-    <h1>최근 질문</h1>
+   <h1><img src="{% static 'polls/img/icon.png' %}" class="icon">최근 질문</h1>
+
+</div>
     {% if latest_question_list %}
         <ul>
         {% for question in latest_question_list %}

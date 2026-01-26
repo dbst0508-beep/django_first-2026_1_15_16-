@@ -1,0 +1,15 @@
+{% extends "polls/base.html" %}
+{% block title %}질문 삭제 확인{% endblock %}
+
+{% block content %}
+<div class="form-container" style="text-align: center;">
+ <h2>정말 삭제하시겠습니까?</h2>
+ <p><strong>{{ object.question_text }}</strong></p>
+
+ <form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn-delete">삭제</button>
+  <a href="{% url 'polls:index' %}" class="btn-cancel">취소</a>
+ </form>
+</div>
+{% endblock %}

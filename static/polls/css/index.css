@@ -1,17 +1,36 @@
 body {
-  background-color: #f5f7fa;
+  background: url("../img/backgrond.jpg") no-repeat top left;
+  background-size: cover;
+  min-height: 100vh ;
+  background-attachment: fixed;
+  color: rgb(255, 255, 255);
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
+  color: rgb(0, 0, 0);
+}
+/*icon*/
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1em;
+    gap: 10px;
 }
 
-header {
-  background-color: #4a4e69;
-  color: white;
-  padding: 20px;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
+/* 2. 아이콘 크기 및 필터 적용 (이걸로 교체하세요) */
+.icon {
+    width: 30px !important;  /* 5px는 너무 작으니 30px 정도로 시작해보세요 */
+    height: 30px !important;
+    object-fit: contain;     /* 이미지 비율 유지 */
+    
+    /* 가짜 PNG 배경 날리기 필살기 */
+    mix-blend-mode: screen !important; 
+    filter: invert(100%) !important; 
+    
+    background: transparent !important;
+    border: none !important;
+    vertical-align: middle;
 }
 
 .site-nav li {
@@ -89,7 +108,7 @@ footer a {
   position: absolute;
   left: 100px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-5%);
 }
 
 .site-nav ul {

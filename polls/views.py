@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Question, Choice
 from django.db.models import F
-from django.urls import reverse
+from django.urls import reverse_lazy,reverse
 from django.http import HttpResponseRedirect
 from django.views import generic
 from django.utils import timezone
@@ -64,3 +64,23 @@ def vote(request, question_id):
 # def aa_page(request):
 #     all_questions = Question.objects.all()
 #     return render(request, 'polls/aa.html', {'questions': all_questions})
+
+#CRUD - Create
+class QuestionCreateView(generic.CreateView):
+    model = Question #Question 테이블을 모델로 
+    fields = ["question_text","pub_date"] #Question테이블의 text,date 필드만 가져옴
+    template_name = "polls/question_form.html" #경로는 question_form
+    success_url = reverse_lazy("polls:index") #실행 후 돌아가는 페이지는 index
+
+class QuestionUpdateView(generic.UpdateView):
+    model = Question
+    fields = ["question_text","pub_date"]
+    template_name = "polls/question_form.html"
+    success_url = reverse_lazy("polls:index")
+
+class QuestionDeleteView(generic.DeleteView):
+    model = Question
+    template_name= "polls/question_confirm_delete.html"
+    success_url = reverse_lazy("polls:index")
+    #위 클래스엔 fields가 없어도 되는 이유 : 입력할게 없고 지우는 역할이라
+    #따로 html에 기능만 만들어주면 됨
