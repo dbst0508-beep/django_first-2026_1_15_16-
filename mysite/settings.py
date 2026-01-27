@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+     
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,8 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*4&i&bm+(dyjsw^6ie6x$3u@1&q=*r@gwoiy2dye4wmherf9u$'
-
+#SECRET_KEY = 'django-insecure-*4&i&bm+(dyjsw^6ie6x$3u@1&q=*r@gwoiy2dye4wmherf9u$'
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -74,11 +78,21 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 
+#     }
+# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_DB", "django_first2_db"),
+        "USER": os.environ.get("POSTGRES_USER", "django_user"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "strong-password"),
+        "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
 
@@ -123,4 +137,4 @@ STATICFILES_DIRS = [
 ]
 
 LOGIN_REDIRECT_URL = "polls:index" # 로그아웃 후 이동할 페이지
-LOGOUT_REDIRECT_URL = "login" #로그인 후 이동할 페이지
+LOGOUT_REDIRECT_URL = "polls:index" #로그인 후 이동할 페이지

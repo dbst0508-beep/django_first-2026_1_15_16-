@@ -1,32 +1,85 @@
-name: Django CI
+name: Django CI #github 액션 워크플로우 이름
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+    #메인 브런치에 push 될때 ci 실행
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+    #메인 브랜치로 풀 리퀘스트 생성/업데이트시 ci 실행
+    #실무에서 일반적인 트리거 조합
 
 jobs:
-  build:
-
+  test:
+  #워크 플로우에서 실행할 이름
+  #관례 = test,build,ci같은 이름
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: ["3.12.3"]
+    #github가 제공하는 우분투 최신 환경에서 실행 서버 준비 필요 X
 
+    services:
+      postgres:
+      #테스트 중 사용할 postgreSQL 컨테이너 서비스 정의 
+        image: postgres:16
+        #PostgreSQL 16버전 Docker 이미지 사용
+        env:
+        #PostgerSQL 컨테이너가 시작될 때 사용할 환경변수
+          POSTGRES_DB: django_first2_db
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: postgres
+          #컨테이너 내부 DB/유저/비밀번호 자동생성
+        ports:
+          - 5432:5432
+          #PostgreSQL 기본 포트
+          #깃허브 액션 러너 <> 컨테이너 간 통신용 
+        options: >-
+          --health-cmd="pg_isready -U django_user -d django_first2_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        #PostgreSQL이 "완전히 준비" 확인하는 헬스체크
+        #DB가 준비되기 전 Django가 접근해서 실패하는 걸 방지
+
+    strategy:
+      fail-fast: false
+      #여러 환경(matrix)을 쓸 때 하나 실패해도 중단 안 함
+    
+      matrix:
+        python-version: ["3.12"]
+      #테스트에 사용할 파이썬 버전 확장 가능 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: "pip"
-        
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run Tests
-      run: |
-        python manage.py test
+    #job 안에서 순서대로 실행될 단계
+      - name: Checkout
+        uses: actions/checkout@v4
+        #깃허브 저장소 코드를 러너로 내려받는 단계
+        #없으면 코드 자체가 없음
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+        # 지정한 Python 버전 설치
+        # pip 캐시 사용 → CI 속도 향상
+
+      - name: Install dependencies
+      #실제 django 테스트 단계 (핵심)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+         #리콰이어먼츠 기준으로 의존성 설치
+          #로컬 환경 ci환경을 동일하게 맞추기 위함
+      - name: Run migrations and tests
+        env:
+        # settings.py에서 읽을 환경변수들
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+           # Django SECRET_KEY (GitHub Secrets에 저장된 값)
+          POSTGRES_DB: django_first2_db
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: 127.0.0.1
+          # PostgreSQL 접속 주소
+          # services + ports를 쓰면 127.0.0.1로 접근 가능
+          POSTGRES_PORT: 5432
+        run: |
+          python manage.py migrate
+          python manage.py test
