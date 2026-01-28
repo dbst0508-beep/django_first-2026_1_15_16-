@@ -2,21 +2,62 @@ from django.shortcuts import render, get_object_or_404
 from .models import Question, Choice
 from django.db.models import F
 from django.urls import reverse_lazy,reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,JsonResponse
 from django.views import generic
 from django.utils import timezone
+import datetime
 # # index(최신글 list)
 # def index(request):
 # 	# return HttpResponse("Hello) 기존코드	
 # 	latest_question_list = Question.objects.order_by("-pub_date")[:5]
 # 	context = {"latest_question_list": latest_question_list}
 # 	return render(request, "polls/index.html", context)
+def _parse_yyyy_mm_dd(value: str):
+    """
+    'YYYY-MM-DD' 형식 문자열을 date로 파싱.
+    실패하면 None 반환.
+    """
+    try:
+        return datetime.date.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+
+
 class IndexView(generic.ListView):
     template_name = "polls/index.html" #이동할 위치
     context_object_name = "latest_question_list" #부를 이름 
 
     def get_queryset(self):
-        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
+        qs = Question.objects.all()
+
+        # 1) show=future → 미래 질문 포함 여부 (기본: 미래 숨김)
+        show = self.request.GET.get("show")
+        if show != "future":
+            qs = qs.filter(pub_date__lte=timezone.now())
+
+        # 2) q=키워드 → question_text 검색
+        q = (self.request.GET.get("q") or "").strip()
+        if q:
+            qs = qs.filter(question_text__icontains=q)
+
+        # 3) start/end=YYYY-MM-DD → 기간 필터
+        start = _parse_yyyy_mm_dd(self.request.GET.get("start"))
+        end = _parse_yyyy_mm_dd(self.request.GET.get("end"))
+
+        if start:
+            qs = qs.filter(pub_date__date__gte=start)
+        if end:
+            qs = qs.filter(pub_date__date__lte=end)
+
+        # 4) order=oldest → 정렬 (기본: 최신순)
+        order = self.request.GET.get("order")
+        if order == "oldest":
+            qs = qs.order_by("pub_date")
+        else:
+            qs = qs.order_by("-pub_date")
+
+        # 5) (옵션) 목록 5개 제한 유지
+        return qs[:5]
 
 
 # def detail(request, question_id):

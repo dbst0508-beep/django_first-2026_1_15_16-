@@ -2,16 +2,30 @@
 {% load static %}
 
 {% block content %}
-   <h1><img src="{% static 'polls/img/icon.png' %}" class="icon">최근 질문</h1>
+   <h1>최근 질문</h1>
 
-</div>
-    {% if latest_question_list %}
-        <ul>
-        {% for question in latest_question_list %}
-            <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No polls are available.</p>
-    {% endif %}
+<form method="get" class="filter-form">
+  <input type="text" name="q" placeholder="질문 검색" value="{{ request.GET.q }}">
+
+  <select name="order">
+    <option value="">최신순</option>
+    <option value="oldest" {% if request.GET.order == "oldest" %}selected{% endif %}>
+      오래된순
+    </option>
+  </select>
+
+  <label>
+    <input type="checkbox" name="show" value="future"
+           {% if request.GET.show == "future" %}checked{% endif %}>
+    미래 질문 포함
+  </label>
+
+  <input type="text" name="start" placeholder="start: 2026-01-01" value="{{ request.GET.start }}">
+  <input type="text" name="end" placeholder="end: 2026-01-31" value="{{ request.GET.end }}">
+
+  <button type="submit">적용</button>
+  <a href="{% url 'polls:index' %}">초기화</a>
+</form>
+
+<hr>
 {% endblock %}
